@@ -37,7 +37,9 @@ def compute_crossconj(x,y,N,Lp):
 
     arr=[]
     for k in range(0,N):
-        arr.append(np.sum(np.real(x[k-Lp:k+Lp+1]*np.conj(y[k-Lp:k+Lp+1][::-1]))))
+        i=np.max([k-Lp,0])
+        j=np.min([k+Lp+1,N])
+        arr.append(np.sum(np.real(x[i:j]*np.conj(y[i:j][::-1]))))
     arr=np.array(arr)
     return arr
 
@@ -82,22 +84,28 @@ def tfrsm(x,y=None,Lp=6,f=None,nwindow=4,silent=0,fps=None,fpe=None,itc=None):
         #        kq=k-ks
     for j in range(0,nsamplet):
 #    for j in range(128,129):
-        sm[:,j]=compute_crossconj(tfrstftx[:,j],tfrstfty[:,j],nsamplef,Lp)
+#        sm[:,j]=compute_crossconj(tfrstftx[:,j],tfrstfty[:,j],nsamplef,Lp)
+#        sm[j,:]=compute_crossconj_mat(tfrstftx[j,:],tfrstfty[j,:],nsamplef,Lp)
+        sm[j,:]=compute_crossconj(tfrstftx[j,:],tfrstfty[j,:],nsamplef,Lp)
+
     return sm
 
 if __name__ == "__main__":
     import sampledata as sd
     import matplotlib.pyplot as plt
-
+    import time
+    start=time.time()
+    
     nsamp=512
     t,x=sd.genmultifm622(nsamp)
-    tfr=tfrsm(x,Lp=12,nwindow=8)
+    tfr=tfrsm(x,Lp=32,nwindow=8)
     tfrstft=stft.tfrstft(x,nwindow=8)
-    
+    print(time.time()-start,"sec")
     print(np.max(tfr),np.min(tfr))
     fig=plt.figure()
     ax=fig.add_subplot(121)
-    ax.imshow(np.log(np.abs(tfrstft[:,:])))
+    ax.imshow((np.abs(tfrstft[:,:])))
     ax=fig.add_subplot(122)
-    ax.imshow(np.log(np.abs(tfr[:,:])))
+    ax.imshow((np.abs(tfr[:,:])))
     plt.show()
+    
