@@ -41,11 +41,12 @@ def tfrstft(x,t=None,N=None,f=None,itc=None,h=None,nwindow=4,silent=0,use_nufft=
 if __name__ == "__main__":
     import sampledata as sd
     import matplotlib.pyplot as plt
-
+    import time
+    start=time.time()
     nsamp=1024*4
     t,x=sd.genmultifm623(nsamp)
     stftx=tfrstft(x)
-    
+    print(time.time()-start,"sec")
     fig=plt.figure()
     ax=fig.add_subplot(111)
     ax.imshow(np.abs(stftx[:,:]))

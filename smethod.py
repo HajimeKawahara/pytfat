@@ -1,46 +1,17 @@
 import numpy as np
 import scipy 
 import stft 
-def compute_crossconj_mat(x,y,N,Lp):
-    b=x*(np.conj(np.array([y]).T)) #diad    
-    bandmat=np.eye(N, k=0)
-    for k in range(1,Lp+1):
-        bandmat+=np.eye(N, k=-2*k)+np.eye(N, k=2*k)        
-    c=(bandmat*b)[:,::-1]
 
-    arr=[]
-    if np.mod(N,2)==1:
-        for j in range(1,int((N-1)/2+1))[::-1]:
-            arr.append(np.trace(c[:-2*j,2*j:]))
-        arr.append(np.trace(c))
-        for j in range(1,int((N-1)/2+1)):
-            arr.append(np.trace(c[2*j:,:-2*j]))
-    else:
-        for j in range(0,int(N/2))[::-1]:
-            arr.append(np.trace(c[:-2*j-1,2*j+1:]))
-        for j in range(0,int(N/2))[::-1]:
-            arr.append(np.trace(c[-2*j-1:,:2*j+1]))
 
-    if False:
-        fig=plt.figure()
-        ax=fig.add_subplot(121)
-        ax.imshow(np.abs(c))
-        ax=fig.add_subplot(122)
-        ax.imshow(np.abs(bandmat))
-        
-        plt.show()
-            
-    arr=np.array(arr)
-    return arr
 
-def compute_crossconj(x,y,N,Lp):
+def compute_crossconj_all(x,y,N,Lp):
 
     arr=[]
     for k in range(0,N):
         i=np.max([k-Lp,0])
         j=np.min([k+Lp+1,N])
-        arr.append(np.sum(np.real(x[i:j]*np.conj(y[i:j][::-1]))))
-    arr=np.array(arr)
+        arr.append(np.sum(np.real(x[:,i:j]*np.conj(y[:,i:j][:,::-1])),axis=1))
+    arr=np.array(arr).T
     return arr
 
 
@@ -80,13 +51,7 @@ def tfrsm(x,y=None,Lp=6,f=None,nwindow=4,silent=0,fps=None,fpe=None,itc=None):
         ke=np.int(np.min([nsamplef,2*fpe+Lp]))
         sm=np.zeros((ke-ks+1,nsamplet),dtype=np.complex)
 
-        #    for k in range(ks,ke):
-        #        kq=k-ks
-    for j in range(0,nsamplet):
-#    for j in range(128,129):
-#        sm[:,j]=compute_crossconj(tfrstftx[:,j],tfrstfty[:,j],nsamplef,Lp)
-#        sm[j,:]=compute_crossconj_mat(tfrstftx[j,:],tfrstfty[j,:],nsamplef,Lp)
-        sm[j,:]=compute_crossconj(tfrstftx[j,:],tfrstfty[j,:],nsamplef,Lp)
+    sm=compute_crossconj_all(tfrstftx,tfrstfty,nsamplef,Lp)
 
     return sm
 
@@ -95,13 +60,12 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     import time
     start=time.time()
-    
     nsamp=512
     t,x=sd.genmultifm622(nsamp)
     tfr=tfrsm(x,Lp=32,nwindow=8)
     tfrstft=stft.tfrstft(x,nwindow=8)
     print(time.time()-start,"sec")
-    print(np.max(tfr),np.min(tfr))
+    
     fig=plt.figure()
     ax=fig.add_subplot(121)
     ax.imshow((np.abs(tfrstft[:,:])))
