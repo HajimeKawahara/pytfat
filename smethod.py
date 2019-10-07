@@ -2,16 +2,16 @@ import numpy as np
 import scipy 
 import stft 
 
-
+#stft(f,t)
 
 def compute_crossconj_all(x,y,N,Lp):
-
     arr=[]
     for k in range(0,N):
         i=np.max([k-Lp,0])
         j=np.min([k+Lp+1,N])
-        arr.append(np.sum(np.real(x[:,i:j]*np.conj(y[:,i:j][:,::-1])),axis=1))
-    arr=np.array(arr).T
+        #arr.append(np.sum(np.real(x[:,i:j]*np.conj(y[:,i:j][:,::-1])),axis=1))
+        arr.append(np.sum(np.abs(x[i:j,:]*np.conj(y[i:j,:][::-1,:])),axis=0))
+    arr=np.array(arr)
     return arr
 
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     start=time.time()
     nsamp=512
     t,x=sd.genmultifm622(nsamp)
-    tfr=tfrsm(x,Lp=32,nwindow=8)
+    tfr=tfrsm(x,Lp=6,nwindow=8)
     tfrstft=stft.tfrstft(x,nwindow=8)
     print(time.time()-start,"sec")
     

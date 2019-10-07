@@ -28,8 +28,7 @@ def tfrstft(x,t=None,N=None,f=None,itc=None,h=None,nwindow=4,silent=0,use_nufft=
         taumax=np.int(np.min([np.floor(Np2)-1,Lh,xrow-ti-1]))
         i0=np.int(np.mod(N+taumin+1,N))
         i1=np.int(np.mod(N+taumax+1,N))
-        tfr[ti+taumin:ti+taumax,icol]=x[ti+taumin:ti+taumax]*np.conj(h[Lh+taumin:Lh+taumax])
-    
+        tfr[ti+taumin:ti+taumax,icol]=x[ti+taumin:ti+taumax]*(h[Lh+taumin:Lh+taumax])
     ###Choose FFT or DFT
     if f is None:
         for i in range(0,Nt):
